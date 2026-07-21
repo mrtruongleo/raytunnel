@@ -1,10 +1,24 @@
 [project]
 name = "raytunnel"
 version = "0.1.0"
-description = "A lightweight, secure, and custom reverse tunnel and SSH forwarding tool."
+description = "A lightweight, secure reverse tunnel and SSH forwarding tool — Ngrok/Gradio alternative for Homelab."
 readme = "README.md"
+license = { text = "MIT" }
 authors = [
     { name = "mrtruongleo", email = "66201727+mrtruongleo@users.noreply.github.com" }
+]
+keywords = ["tunnel", "reverse-proxy", "ssh", "ngrok", "kaggle", "homelab", "websocket"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: Proxy Servers",
+    "Topic :: System :: Networking",
 ]
 requires-python = ">=3.9"
 dependencies = [
@@ -14,6 +28,11 @@ dependencies = [
     "rich>=13.0.0",
     "click>=8.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/mrtruongleo/raytunnel"
+Repository = "https://github.com/mrtruongleo/raytunnel"
+Issues = "https://github.com/mrtruongleo/raytunnel/issues"
 
 [project.scripts]
 raytunnel = "raytunnel.cli:main"
