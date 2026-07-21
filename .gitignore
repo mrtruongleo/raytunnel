@@ -13,3 +13,4 @@ wheels/
 .env
 docker/.env
 publish.md
+publish.sh

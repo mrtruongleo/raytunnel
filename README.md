@@ -77,13 +77,15 @@ raytunnel/
 ### Cài từ PyPI (khuyên dùng)
 
 ```bash
-pip install raytunnel
+uv pip install raytunnel
+# hoặc: pip install raytunnel
 ```
 
 ### Cài từ source (GitHub)
 
 ```bash
-pip install git+https://github.com/mrtruongleo/raytunnel.git
+uv pip install git+https://github.com/mrtruongleo/raytunnel.git
+# hoặc: pip install git+https://github.com/mrtruongleo/raytunnel.git
 ```
 
 ### Cài ở chế độ editable (phát triển local)
@@ -106,7 +108,8 @@ Bạn có ba cách để chạy server:
 
 1. Cài đặt package `raytunnel` trên container:
    ```bash
-   pip install git+https://github.com/mrtruongleo/raytunnel.git
+   uv pip install raytunnel
+   # hoặc: pip install raytunnel
    ```
 2. Copy file `raytunnel-server.service` vào `/etc/systemd/system/`:
    ```bash
@@ -283,11 +286,12 @@ proxy_set_header X-Forwarded-Proto $scheme;
 ### 3. Cài đặt & Sử dụng Client (Trên Kaggle / Colab / Máy trạm)
 
 ```bash
-# Cài đặt qua pip từ Git (môi trường remote)
-pip install git+https://github.com/mrtruongleo/raytunnel.git
+# Cài đặt từ PyPI (khuyên dùng)
+uv pip install raytunnel
+# hoặc: pip install raytunnel
 
-# Hoặc cài đặt ở chế độ editable (phát triển local)
-uv pip install -e /path/to/raytunnel
+# Hoặc cài từ GitHub (lấy code mới nhất chưa release)
+uv pip install git+https://github.com/mrtruongleo/raytunnel.git
 ```
 
 #### Cách A: Sử dụng Command Line (CLI)
@@ -351,3 +355,150 @@ Khi bạn khởi chạy client với tùy chọn `--ssh`:
    ssh -i raytunnel_id_ed25519 -p 2200 root@s.yourdomain.com
    ```
    Server cấm đăng nhập bằng mật khẩu và chỉ nhận đúng khóa đã đăng ký — đảm bảo không ai brute-force được.
+
+---
+
+## 🌐 Sử dụng Tunnel sau khi kết nối
+
+Sau khi client kết nối thành công, log sẽ in ra thông tin cần dùng:
+
+```
+✔ Raytunnel Established Successfully!
+HTTP Web App URL : https://my-worker.s.yourdomain.com
+SSH Command      : ssh -i ~/.ssh/raytunnel_id_ed25519 -p 2200 root@s.yourdomain.com
+```
+
+### 🖥 Truy cập Web App qua HTTP Tunnel
+
+Mở trình duyệt và truy cập URL được in ra — web app chạy trên remote instance (Gradio, FastAPI, RVC, v.v.) sẽ hiển thị như một trang web bình thường:
+
+```
+https://my-worker.s.yourdomain.com
+```
+
+Tất cả HTTP/HTTPS request (kể cả WebSocket) đều được tunnel tự động. Không cần cấu hình thêm bất cứ điều gì phía ứng dụng.
+
+---
+
+### 🔌 Tích hợp API từ máy local
+
+Raytunnel là **tunnel trong suốt** — toàn bộ HTTP traffic được chuyển tiếp nguyên vẹn đến app của bạn đang chạy trên remote. Raytunnel không tự cung cấp bất kỳ endpoint nghiệp vụ nào.
+
+Endpoint nào có thể gọi hoàn toàn phụ thuộc vào **web app bạn đang chạy** trên Kaggle/Colab (FastAPI, Gradio, Flask, v.v.):
+
+```python
+import requests
+
+# URL do raytunnel cung cấp, nhưng /your-endpoint là do app của bạn định nghĩa
+BASE_URL = "https://my-worker.s.yourdomain.com"
+
+response = requests.post(f"{BASE_URL}/your-endpoint", json={"key": "value"})
+print(response.json())
+```
+
+Ví dụ nếu app của bạn là một FastAPI server expose `/predict`:
+
+```python
+# Trên remote (Kaggle) — app FastAPI của bạn
+# GET /health  →  {"status": "ok"}
+# POST /predict  →  {"result": ...}
+
+# Trên máy local — gọi qua tunnel bình thường
+response = requests.get(f"{BASE_URL}/health")
+response = requests.post(f"{BASE_URL}/predict", json={"data": [1, 2, 3]})
+```
+
+
+Với WebSocket:
+
+```python
+import asyncio, websockets
+
+async def stream():
+    async with websockets.connect("wss://my-worker.s.yourdomain.com/ws") as ws:
+        await ws.send("hello")
+        msg = await ws.recv()
+        print(msg)
+
+asyncio.run(stream())
+```
+
+---
+
+### 🔑 Kết nối SSH Terminal
+
+Sau khi client in ra SSH Command, copy private key từ remote về máy local trước:
+
+```bash
+# 1. Copy private key từ remote về máy local qua SCP
+scp -i ~/.ssh/raytunnel_id_ed25519 -P 2200 \
+    root@s.yourdomain.com:~/.ssh/raytunnel_id_ed25519 \
+    ~/raytunnel_id_ed25519
+
+# 2. Set quyền đúng cho key
+chmod 600 ~/raytunnel_id_ed25519
+```
+
+Hoặc nếu đang dùng Kaggle Notebook, lấy key bằng Python:
+
+```python
+# Chạy trong Kaggle cell để in ra private key
+with open("/root/.ssh/raytunnel_id_ed25519") as f:
+    print(f.read())
+# → Copy nội dung, paste vào file ~/raytunnel_id_ed25519 trên máy local
+```
+
+Sau đó SSH vào:
+
+```bash
+ssh -i ~/raytunnel_id_ed25519 -p 2200 root@s.yourdomain.com
+```
+
+Thêm vào `~/.ssh/config` để gõ lệnh ngắn hơn:
+
+```sshconfig
+Host kaggle-worker
+    HostName       s.yourdomain.com
+    Port           2200
+    User           root
+    IdentityFile   ~/raytunnel_id_ed25519
+    StrictHostKeyChecking no
+```
+
+```bash
+# Sau đó chỉ cần:
+ssh kaggle-worker
+```
+
+---
+
+### 💻 Kết nối VS Code Remote SSH
+
+1. Cài extension **Remote - SSH** trong VS Code.
+2. Thêm config SSH như trên vào `~/.ssh/config`.
+3. Nhấn `Ctrl+Shift+P` → **Remote-SSH: Connect to Host** → chọn `kaggle-worker`.
+4. VS Code sẽ mở một cửa sổ editor hoàn toàn chạy trên remote instance — có thể duyệt file, chỉnh sửa code, dùng terminal như trên máy local.
+
+---
+
+### 📁 Truyền File qua SCP
+
+```bash
+# Upload file từ máy local lên remote
+scp -i ~/raytunnel_id_ed25519 -P 2200 \
+    ./local_file.wav \
+    root@s.yourdomain.com:/kaggle/working/
+
+# Download file từ remote về máy local
+scp -i ~/raytunnel_id_ed25519 -P 2200 \
+    root@s.yourdomain.com:/kaggle/working/output.wav \
+    ./output.wav
+```
+
+Hoặc dùng `rsync` để đồng bộ thư mục:
+
+```bash
+rsync -avz -e "ssh -i ~/raytunnel_id_ed25519 -p 2200" \
+    ./local_dir/ \
+    root@s.yourdomain.com:/kaggle/working/
+```
