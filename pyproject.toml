@@ -1,0 +1,23 @@
+[project]
+name = "raytunnel"
+version = "0.1.0"
+description = "A lightweight, secure, and custom reverse tunnel and SSH forwarding tool."
+readme = "README.md"
+authors = [
+    { name = "mrtruongleo", email = "66201727+mrtruongleo@users.noreply.github.com" }
+]
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.22.0",
+    "websockets>=11.0.0",
+    "rich>=13.0.0",
+    "click>=8.0.0",
+]
+
+[project.scripts]
+raytunnel = "raytunnel.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

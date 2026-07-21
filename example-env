@@ -1,0 +1,8 @@
+# Cấu hình bí mật riêng của bạn
+RAYTUNNEL_TOKEN=your-secure-token
+DOMAIN=s.yourdomain.com
+
+# (Tùy chọn) Cấu hình Port nếu muốn đổi port mặc định
+PORT=8001
+TCP_PORT=8000
+SSH_PORT_RANGE=2200-2300

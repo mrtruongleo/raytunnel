@@ -1,0 +1,17 @@
+services:
+  raytunnel-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: raytunnel-server
+    restart: unless-stopped
+    ports:
+      - "${TCP_PORT:-8000}:8000"           # HTTP Routing entrypoint (TCP)
+      - "${PORT:-8001}:8001"           # FastAPI Control/Data WebSockets API
+      - "${SSH_PORT_RANGE:-2200-2300}:2200-2300" # Dynamic SSH port-forwarding range
+    environment:
+      - RAYTUNNEL_TOKEN=${RAYTUNNEL_TOKEN:-change-me}
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=${PORT:-8001}
+      - TCP_PORT=${TCP_PORT:-8000}
+      - DOMAIN=${DOMAIN:-s.yourdomain.com}

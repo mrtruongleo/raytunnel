@@ -1,0 +1,19 @@
+[Unit]
+Description=Raytunnel Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+# Adjust Cwd if necessary to where the raytunnel source is cloned
+WorkingDirectory=/opt/raytunnel
+# Ensure virtualenv path or pip install executable is referenced correctly
+ExecStart=/usr/local/bin/raytunnel server --host 0.0.0.0 --port 8001 --tcp-port 8000 --token my_secret_token
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=raytunnel-server
+
+[Install]
+WantedBy=multi-user.target
