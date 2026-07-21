@@ -72,6 +72,30 @@ raytunnel/
 
 ---
 
+## 📥 Cài đặt
+
+### Cài từ PyPI (khuyên dùng)
+
+```bash
+pip install raytunnel
+```
+
+### Cài từ source (GitHub)
+
+```bash
+pip install git+https://github.com/mrtruongleo/raytunnel.git
+```
+
+### Cài ở chế độ editable (phát triển local)
+
+```bash
+git clone https://github.com/mrtruongleo/raytunnel.git
+cd raytunnel
+uv pip install -e .
+```
+
+---
+
 ## 🛠 Hướng dẫn Cấu hình & Triển khai
 
 ### 1. Triển khai Server (Trên Proxmox Container / VPS)
