@@ -1,6 +1,6 @@
 [project]
 name = "raytunnel"
-version = "0.1.0"
+version = "0.1.1"
 description = "A lightweight, secure reverse tunnel and SSH forwarding tool — Ngrok/Gradio alternative for Homelab."
 readme = "README.md"
 license = { text = "MIT" }
